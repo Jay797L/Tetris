@@ -1,13 +1,14 @@
 #ifndef SRC_S21_BRICK_GAME_H_
 #define SRC_S21_BRICK_GAME_H_
 
-#define LENGTH 20
-#define WIDTH 10
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <ncurses.h>
+#include "brick_game/tetris/tetris.h"
+#include "gui/cli/cli.h"
+
+
+typedef union {
+    GameInfo_t screen;
+    TetrisInfo tetris;
+} s21_brick_game;
 
 typedef enum {
   Start,
@@ -20,19 +21,8 @@ typedef enum {
   Action
 } UserAction_t;
 
-typedef struct {
-  int **field;
-  int **next;
-  int score;
-  int high_score;
-  int level;
-  int speed;
-  int pause;
-} GameInfo_t;
-
-
 void userInput(UserAction_t action, bool hold);
-GameInfo_t updateCurrentState();
 
+GameInfo_t updateCurrentState();
 
 #endif

@@ -1,7 +1,23 @@
-#ifndef SRC_S21_TETRIS_H_
-#define SRC_S21_TETRIS_H_
+#ifndef SRC_S21_CLI_H_
+#define SRC_S21_CLI_H_
 
-#include "../../s21_brick_game.h"
+#include <ncurses.h>
+#include <string.h>
 
+typedef struct {
+  int **field;
+  int **next;
+  int score;
+  int high_score;
+  int level;
+  int speed;
+  int pause;
+} GameInfo_t;
+
+void initNcurses();
+
+void printMenu();
+
+void render();
 
 #endif
