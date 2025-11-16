@@ -21,18 +21,15 @@ int main(){
     }
 }
 
-void startTetris(){
+void tetris(){
     int ch;
     bool hold = 0;
-    UserAction_t input;
     FullGameInfo_t* state = getInfo();
     initInfo();
-    while(1) {
+    while(state->status != QUIT) {
       render(updateCurrentState());
       ch = getch();
-      input = functionKeys(ch);
-      userInput(ch, hold);
-        
+      userInput(functionKeys(ch), hold);
     }
 }
 
@@ -43,30 +40,31 @@ UserAction_t functionKeys(int ch){
   case ('s'):
     res = Start;
     break;
-  case (''):
-    res = 1;
+  case ('p'):
+    res = Pause;
   break;
-  case (''):
-    res = 2;
+  case ('q'):
+    res = Terminate;
   break;
-  case (''):
-    res = 3;
+  case (KEY_UP):
+    res = Up;
   break;
-  case (''):
-    res = 4;
+  case (KEY_LEFT):
+    res = Left;
   break;
-  case (''):
-    res = 5;
+  case (KEY_RIGHT):
+    res = Right;
   break;
-  case (''):
-    res = 6;
+  case (KEY_DOWN):
+    res = Down;
   break;
-  case (''):
-    res = 7;
+  case (' '):
+    res = Action;
   break;
   default:
     break;
   }
+  return res;
 }
 
 void userInput(UserAction_t action, bool hold) {
@@ -96,6 +94,7 @@ void userInput(UserAction_t action, bool hold) {
       lower_block();
       break;
   }
+  if (hold == 1) hold = 0;
 }
 
 GameInfo_t updateCurrentState(){

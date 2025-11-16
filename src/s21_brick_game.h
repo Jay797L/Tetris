@@ -25,4 +25,8 @@ void userInput(UserAction_t action, bool hold);
 
 GameInfo_t updateCurrentState();
 
+void tetris();
+
+UserAction_t functionKeys(int ch);
+
 #endif

@@ -1,6 +1,7 @@
 CC = gcc
 FLAGS = -Wall -Wextra -g -Werror
-SOURCES = s21_$(PROJECT_NAME).c
+PROJECT_NAME = brick_game
+SOURCES = s21_$(PROJECT_NAME).c brick_game/tetris/tetris.c brick_game/tetris/s21_block.c gui/cli/cli.c
 HEADER = s21_$(PROJECT_NAME).h 
 RESULT = s21_$(PROJECT_NAME).o
 RESULT_LIB = s21_$(PROJECT_NAME).a
@@ -16,7 +17,7 @@ $(RESULT_LIB): $(SOURCES) $(HEADER) clean
 	@rm *.o
 
 $(RESULT): $(SOURCES) $(HEADER) clean
-	$(CC) $(FLAGS) -c $(SOURCES)
+	$(CC) $(FLAGS) -o tetris $(SOURCES) -lncurses
 
 test: clean s21_matrix.a
 	$(CC) $(FLAGS) $(TEST) s21_matrix.a -o test $(CHECK_LIBS)

@@ -1,6 +1,7 @@
 #include "tetris.h"
 
-void create_block(int type, Block *block) {
+void create_block(Block *block) {
+  int type = rand()%7;
   block->rows = (type == ALPHA ? 1 : 2);
   block->columns = (type == ALPHA ? 4 : (type == DELTA) ? 2 : 3);
   block->matrix = (int **)calloc(block->rows, sizeof(int *));
@@ -8,10 +9,13 @@ void create_block(int type, Block *block) {
     block->matrix[i] = (int *)calloc(block->columns, sizeof(int));
   }
   block->type = type;
+
   gen_block(block);
 }
 
 void gen_block(Block *block) {
+  block->x = (10 - block->rows)/2;
+  block->y = 0;
   switch (block->type) {
     case ALPHA:
       block->matrix[0][0] = 1;
