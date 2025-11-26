@@ -52,28 +52,38 @@ typedef enum{
 
 typedef struct {
   TetrisInfo screen;
-  Block* block_now;
-  Block* block_next;
+  Block block_now;
+  Block block_next;
   GameStatus status;
   int matrix_without_block[LENGTH][WIDTH];
+  int rows_to_delete[5];
 } FullGameInfo_t;
 
 FullGameInfo_t* getInfo();
 
 void initInfo();
 
-void create_block(int type, Block *block);
+void create_block(Block *block);
 void gen_block(Block *block);
-void rotate(Block *block);
+void rotate_block(Block *block);
 void remove_block(Block *block);
+void transfer_block(Block *now, Block *next);
+void transpose_block(Block *now, Block *bufer);
 
 void start_game();
 void pause_game();
 void terminate_game();
-void rotate_block();
-void move_block(int move);
+void rotate();
+int move_block(int move);
 void lower_block();
 
 void clean_screen(TetrisInfo* screen);
+int full_field();
+void attachment();
+
+void kill_string_input(int i);
+void kill_score_input();
+void killing_strings();
+void remove_strings();
 
 #endif

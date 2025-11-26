@@ -31,6 +31,7 @@ void tetris(){
       ch = getch();
       userInput(functionKeys(ch), hold);
     }
+    
 }
 
 UserAction_t functionKeys(int ch){
@@ -79,7 +80,7 @@ void userInput(UserAction_t action, bool hold) {
       terminate_game();
       break;
     case Up:
-      rotate_block();
+      rotate();
       break;
     case Left:
       move_block(Left);
@@ -98,10 +99,8 @@ void userInput(UserAction_t action, bool hold) {
 }
 
 GameInfo_t updateCurrentState(){
-
-    //тут должно быть чтота
-
     FullGameInfo_t* state = getInfo();
+    full_field();
     s21_brick_game screen;
     screen.tetris = state->screen;
     return screen.screen;

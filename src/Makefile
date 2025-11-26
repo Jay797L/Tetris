@@ -42,3 +42,6 @@ clang: clean
 
 leaks: test
 	CK_FORK=no leaks -atExit -- ./test
+
+run: $(RESULT)
+	./tetris

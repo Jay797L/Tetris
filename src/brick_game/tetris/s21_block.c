@@ -14,8 +14,8 @@ void create_block(Block *block) {
 }
 
 void gen_block(Block *block) {
-  block->x = (10 - block->rows)/2;
-  block->y = 0;
+  block->x = 0;
+  block->y = (10 - block->rows)/2;
   switch (block->type) {
     case ALPHA:
       block->matrix[0][0] = 1;
@@ -62,7 +62,7 @@ void gen_block(Block *block) {
   }
 }
 
-void rotate(Block *block) {
+void rotate_block(Block *block) {
   Block bufer = *block;
   remove_block(block);
   block->rows = bufer.columns;
@@ -80,4 +80,32 @@ void remove_block(Block *block) {
     free(block->matrix[i]);
   }
   free(block->matrix);
+}
+
+void transfer_block(Block *now, Block *next){
+  remove_block(now);
+  now->rows = next->rows;
+  now->columns = next->columns;
+  now->matrix = next->matrix;
+  now->type = next->type;
+  now->y = next->y;
+  now->x = next->x;
+
+  create_block(next);
+}
+
+void transpose_block(Block *now, Block *bufer){
+  bufer->rows = now->rows;
+  bufer->columns = now->columns;
+  bufer->matrix = now->matrix;
+  now->rows = bufer->columns;
+  now->columns = bufer->rows;
+  now->matrix = (int **)calloc(now->rows, sizeof(int *));
+  for (int i = 0; i < now->rows; i++) {
+    now->matrix[i] = (int *)calloc(now->columns, sizeof(int));
+  }
+
+  for(int i = 0; i < bufer->rows; i++){
+    for(int j = 0; j < bufer->columns; j++) now->matrix[bufer->columns - j - 1][i] = bufer->matrix[i][j];
+  }
 }
