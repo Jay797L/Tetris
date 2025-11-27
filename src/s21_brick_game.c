@@ -28,14 +28,14 @@ void tetris(){
     initInfo();
     while(state->status != QUIT) {
       render(updateCurrentState());
+      
       ch = getch();
       userInput(functionKeys(ch), hold);
     }
-    
 }
 
 UserAction_t functionKeys(int ch){
-  UserAction_t res = 0;
+  UserAction_t res = -1;
   switch (ch)
   {
   case ('s'):
@@ -94,6 +94,8 @@ void userInput(UserAction_t action, bool hold) {
     case Action:
       lower_block();
       break;
+    default:
+      break;
   }
   if (hold == 1) hold = 0;
 }
@@ -101,6 +103,7 @@ void userInput(UserAction_t action, bool hold) {
 GameInfo_t updateCurrentState(){
     FullGameInfo_t* state = getInfo();
     full_field();
+    next_field();
     s21_brick_game screen;
     screen.tetris = state->screen;
     return screen.screen;

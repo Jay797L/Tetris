@@ -79,6 +79,7 @@ void lower_block();
 
 void clean_screen(TetrisInfo* screen);
 int full_field();
+void next_field();
 void attachment();
 
 void kill_string_input(int i);
@@ -86,4 +87,5 @@ void kill_score_input();
 void killing_strings();
 void remove_strings();
 
+void game_over();
 #endif

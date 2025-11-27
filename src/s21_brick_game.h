@@ -3,7 +3,7 @@
 
 #include "brick_game/tetris/tetris.h"
 #include "gui/cli/cli.h"
-
+#include <sys/time.h>
 
 typedef union {
     GameInfo_t screen;

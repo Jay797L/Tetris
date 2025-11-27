@@ -66,7 +66,7 @@ void render(GameInfo_t screen) {
     
     int start_y = 1;
     int field_start_x = 1;
-    int info_start_x = FIELD_WIDTH * 2 + 3; // Поле (10*2) + пробелы
+    int info_start_x = FIELD_WIDTH * 2 + 3;
     
     // Верхние границы
     for (int i = 0; i < FIELD_WIDTH * 2 + 1; i++) {
@@ -76,8 +76,8 @@ void render(GameInfo_t screen) {
         mvprintw(start_y, info_start_x + i, "*");
     }
     
-    // Боковые границы и содержимое
-    for (int y = 1; y <= DISPLAY_HEIGHT; y++) {
+    // Боковые границы и содержимое - уменьшено до 20 строк
+    for (int y = 1; y <= 20; y++) { // Было DISPLAY_HEIGHT (22)
         // Левое окно - поле
         mvprintw(start_y + y, field_start_x, "*");
         mvprintw(start_y + y, field_start_x + FIELD_WIDTH * 2 + 1, "*");
@@ -95,17 +95,17 @@ void render(GameInfo_t screen) {
         }
     }
     
-    // Нижние границы
+    // Нижние границы - на 21 строке (start_y + 20 + 1)
     for (int i = 0; i < FIELD_WIDTH * 2 + 1; i++) {
-        mvprintw(start_y + DISPLAY_HEIGHT + 1, field_start_x + i, "*");
+        mvprintw(start_y + 21, field_start_x + i, "*"); // Было DISPLAY_HEIGHT + 1 (23)
     }
     for (int i = 0; i < INFO_WIDTH * 2 + 1; i++) {
-        mvprintw(start_y + DISPLAY_HEIGHT + 1, info_start_x + i, "*");
+        mvprintw(start_y + 21, info_start_x + i, "*"); // Было DISPLAY_HEIGHT + 1 (23)
     }
     
-    // Отрисовка игрового поля
+    // Отрисовка игрового поля (только 20 строк)
     if (screen.field != NULL) {
-        for (int y = 0; y < FIELD_HEIGHT; y++) {
+        for (int y = 0; y < 20; y++) { // Отрисовываем только 20 строк
             for (int x = 0; x < FIELD_WIDTH; x++) {
                 if (screen.field[y][x]) {
                     mvprintw(start_y + y + 1, field_start_x + x * 2 + 1, "[]");
@@ -119,32 +119,39 @@ void render(GameInfo_t screen) {
     // NEXT (следующая фигура)
     char* next_text = "NEXT";
     int next_x = info_start_x + (INFO_WIDTH * 2 - strlen(next_text)) / 2 + 1;
-    mvprintw(start_y + 2, next_x, "%s", next_text);
+    mvprintw(start_y + 1, next_x, "%s", next_text);
     
     // Рамка для следующей фигуры
-    int next_box_y = start_y + 4;
-    int next_box_x = info_start_x + (INFO_WIDTH * 2 - 8) / 2 + 1;
+    int next_box_y = start_y + 2;
+    int next_box_x = info_start_x + (INFO_WIDTH * 2 - 12) / 2 + 1;
     
     // Верхняя граница рамки
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 12; i++) {
         mvprintw(next_box_y, next_box_x + i, "*");
     }
     // Боковые границы
     for (int i = 1; i <= 4; i++) {
         mvprintw(next_box_y + i, next_box_x, "*");
-        mvprintw(next_box_y + i, next_box_x + 7, "*");
+        mvprintw(next_box_y + i, next_box_x + 11, "*");
+        // Заполняем пробелами внутри рамки
+        for (int j = 1; j < 11; j++) {
+            mvprintw(next_box_y + i, next_box_x + j, " ");
+        }
     }
     // Нижняя граница
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 12; i++) {
         mvprintw(next_box_y + 5, next_box_x + i, "*");
     }
     
-    // Отрисовка следующей фигуры
+    // Отрисовка следующей фигуры по центру рамки
     if (screen.next != NULL) {
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < 4; x++) {
                 if (screen.next[y][x]) {
-                    mvprintw(next_box_y + y + 1, next_box_x + x * 2 + 1, "[]");
+                    // Центрируем фигуру в рамке 12x6
+                    int draw_y = next_box_y + y + 1;
+                    int draw_x = next_box_x + (12 - 8) / 2 + x * 2;
+                    mvprintw(draw_y, draw_x, "[]");
                 }
             }
         }
@@ -153,44 +160,44 @@ void render(GameInfo_t screen) {
     // SCORE
     char* score_text = "SCORE";
     int score_x = info_start_x + (INFO_WIDTH * 2 - strlen(score_text)) / 2 + 1;
-    mvprintw(start_y + 11, score_x, "%s", score_text);
+    mvprintw(start_y + 9, score_x, "%s", score_text);
     
     char score_str[8];
     snprintf(score_str, sizeof(score_str), "%07d", screen.score);
     int score_val_x = info_start_x + (INFO_WIDTH * 2 - 7) / 2 + 1;
-    mvprintw(start_y + 12, score_val_x, "%s", score_str);
+    mvprintw(start_y + 10, score_val_x, "%s", score_str);
     
     // HIGH SCORE
     char* high_score_text = "HIGH SCORE";
     int high_score_x = info_start_x + (INFO_WIDTH * 2 - strlen(high_score_text)) / 2 + 1;
-    mvprintw(start_y + 14, high_score_x, "%s", high_score_text);
+    mvprintw(start_y + 12, high_score_x, "%s", high_score_text);
     
     char high_score_str[8];
     snprintf(high_score_str, sizeof(high_score_str), "%07d", screen.high_score);
     int high_score_val_x = info_start_x + (INFO_WIDTH * 2 - 7) / 2 + 1;
-    mvprintw(start_y + 15, high_score_val_x, "%s", high_score_str);
+    mvprintw(start_y + 13, high_score_val_x, "%s", high_score_str);
+    
+    // PAUSE
+    char* pause_text = "PAUSE";
+    int pause_x = info_start_x + (INFO_WIDTH * 2 - strlen(pause_text)) / 2 + 1;
+    mvprintw(start_y + 15, pause_x, "%s", pause_text);
+    
+    // Отображаем статус паузы
+    char* pause_status = screen.pause ? "ON" : "OFF";
+    int pause_status_x = info_start_x + (INFO_WIDTH * 2 - strlen(pause_status)) / 2 + 1;
+    mvprintw(start_y + 16, pause_status_x, "%s", pause_status);
     
     // LEVEL
     char level_str[12];
     snprintf(level_str, sizeof(level_str), "LEVEL %02d", screen.level);
     int level_x = info_start_x + (INFO_WIDTH * 2 - strlen(level_str)) / 2 + 1;
-    mvprintw(start_y + 17, level_x, "%s", level_str);
+    mvprintw(start_y + 18, level_x, "%s", level_str);
     
     // SPEED
     char speed_str[12];
     snprintf(speed_str, sizeof(speed_str), "SPEED %02d", screen.speed);
     int speed_x = info_start_x + (INFO_WIDTH * 2 - strlen(speed_str)) / 2 + 1;
     mvprintw(start_y + 19, speed_x, "%s", speed_str);
-    
-    // PAUSE
-    char* pause_text = "PAUSE";
-    int pause_x = info_start_x + (INFO_WIDTH * 2 - strlen(pause_text)) / 2 + 1;
-    mvprintw(start_y + 21, pause_x, "%s", pause_text);
-    
-    // Отображаем статус паузы
-    char* pause_status = screen.pause ? "ON" : "OFF";
-    int pause_status_x = info_start_x + (INFO_WIDTH * 2 - strlen(pause_status)) / 2 + 1;
-    mvprintw(start_y + 22, pause_status_x, "%s", pause_status);
     
     refresh();
 }

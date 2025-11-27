@@ -27,7 +27,7 @@ void initInfo(){
     }
     
 
-    state->status = 0;
+    state->status = START;
 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -41,7 +41,20 @@ void initInfo(){
 
 void start_game(){
     FullGameInfo_t* state = getInfo();
-    if(state->status == START){
+    if(state->status == GAMEOVER){
+      remove_block(&state->block_now);
+      remove_block(&state->block_next);
+      state->screen.score = 0;
+      state->screen.level = 1;
+      state->screen.speed = 1;
+      state->screen.pause = 0;
+      for (int i = 0; i < LENGTH; i++)
+      {
+        for (int j = 0; j < WIDTH; j++) state->matrix_without_block[i][j] = 0;
+      }
+      
+    }
+    if(state->status == START || state->status == GAMEOVER){
       state->status = GAME;
       create_block(&state->block_now);
       create_block(&state->block_next);
@@ -50,8 +63,9 @@ void start_game(){
 
 void pause_game(){
   FullGameInfo_t* state = getInfo();
-  state->screen.pause = !state->screen.pause;
-  state->status = PAUSE;
+  if(state->status == PAUSE) state->status = GAME;
+  else if(state->status == GAME) state->status = PAUSE;
+  state->screen.pause = state->status == PAUSE;
 }
 
 void terminate_game(){
@@ -149,6 +163,22 @@ int full_field(){
   return res;
 }
 
+void next_field(){
+  FullGameInfo_t* state = getInfo();
+  Block block = state->block_next;
+  int x = 1;
+  int y = 0;
+  if(block.type == DELTA) y = 1;
+  for(int i = 0; i < 4; i++){
+    for(int j = 0; j < 4; j++){
+      state->screen.next[i][j] = 0;
+      int is_now_x = i - x;
+      int is_now_y = j - y;
+      if(is_now_x < block.rows && is_now_x >= 0 && is_now_y < block.columns && is_now_y >= 0) state->screen.next[i][j] = block.matrix[is_now_x][is_now_y];
+    }
+  }
+} 
+
 void attachment(){
   FullGameInfo_t* state = getInfo();
   full_field();
@@ -167,6 +197,9 @@ void attachment(){
     remove_strings();
   }
   transfer_block(&state->block_now, &state->block_next);
+  if(full_field() != 0){
+    game_over();
+  }
 }
 
 void kill_string_input(int i){
@@ -213,4 +246,9 @@ void remove_strings(){
       } else state->matrix_without_block[i][j] = 0; 
     }
   }
+}
+
+void game_over(){
+  FullGameInfo_t* state = getInfo();
+  state->status = GAMEOVER;
 }
