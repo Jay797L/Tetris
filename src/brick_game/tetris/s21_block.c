@@ -80,6 +80,7 @@ void remove_block(Block *block) {
     free(block->matrix[i]);
   }
   free(block->matrix);
+  block->matrix = NULL;
 }
 
 void transfer_block(Block *now, Block *next){

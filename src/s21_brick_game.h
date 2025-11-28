@@ -29,4 +29,5 @@ void tetris();
 
 UserAction_t functionKeys(int ch);
 
+void auto_fall(struct timeval *last_time, struct timeval *current_time);
 #endif

@@ -18,7 +18,7 @@ void initInfo(){
     state->screen.score = 0;
     state->screen.high_score = 0;
     state->screen.level = 1;
-    state->screen.speed = 1;
+    state->screen.speed = 1200;
     state->screen.pause = 0;
 
     state->rows_to_delete[0] = 0;
@@ -46,7 +46,7 @@ void start_game(){
       remove_block(&state->block_next);
       state->screen.score = 0;
       state->screen.level = 1;
-      state->screen.speed = 1;
+      state->screen.speed = 1200;
       state->screen.pause = 0;
       for (int i = 0; i < LENGTH; i++)
       {
@@ -80,15 +80,19 @@ void terminate_game(){
 
 void rotate(){
     FullGameInfo_t* state = getInfo();
-    if(state->status != GAME) return;
+    if(state->status != GAME || state->block_now.type == DELTA) return;
     Block buffer;
+    buffer.y = state->block_now.y;
     transpose_block(&state->block_now, &buffer);
+    if(state->block_now.type == ALPHA) state->block_now.y += (state->block_now.rows == 4? 1 : -1);
+    if(state->block_now.y < 0 || state->block_now.y + state->block_now.columns >= WIDTH) state->block_now.y = (state->block_now.y < 0 ? 0 : WIDTH - state->block_now.columns);
     if(full_field() == 0) remove_block(&buffer);
     else {
       remove_block(&state->block_now);
       state->block_now.matrix = buffer.matrix;
       state->block_now.rows = buffer.rows;
       state->block_now.columns = buffer.columns;
+      state->block_now.y = buffer.y;
     }
 }
 
@@ -231,6 +235,8 @@ void killing_strings(){
     }
   }
   state->screen.score += state->rows_to_delete[0];
+  state->screen.level = (state->screen.score <= 6000) ? (state->screen.score / 600 % 10 + 1) : 10;
+  state->screen.speed = 1200 - state->screen.level * 100;
   state->rows_to_delete[0] = 0;
   if(state->screen.score > state->screen.high_score) state->screen.high_score = state->screen.score;
 }

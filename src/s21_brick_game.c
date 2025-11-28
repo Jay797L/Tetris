@@ -26,11 +26,15 @@ void tetris(){
     bool hold = 0;
     FullGameInfo_t* state = getInfo();
     initInfo();
+
+    struct timeval last_time, current_time;
+    gettimeofday(&last_time, NULL);
     while(state->status != QUIT) {
+      auto_fall(&last_time, &current_time);
       render(updateCurrentState());
-      
       ch = getch();
       userInput(functionKeys(ch), hold);
+      nodelay(stdscr, state->status == GAME);
     }
 }
 
@@ -107,4 +111,19 @@ GameInfo_t updateCurrentState(){
     s21_brick_game screen;
     screen.tetris = state->screen;
     return screen.screen;
+}
+
+void auto_fall(struct timeval *last_time, struct timeval *current_time){
+  FullGameInfo_t* state = getInfo();
+  // Получаем текущее время
+  gettimeofday(current_time, NULL);
+        
+  // Вычисляем прошедшее время в миллисекундах
+  long elapsed_ms = (current_time->tv_sec - last_time->tv_sec) * 1000 + (current_time->tv_usec - last_time->tv_usec) / 1000;
+        
+  // Если прошло достаточно времени для автопадения
+  if (elapsed_ms >= state->screen.speed && state->status == GAME) {
+    move_block(Down);
+    gettimeofday(last_time, NULL); // Сбрасываем таймер
+  }
 }
