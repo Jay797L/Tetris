@@ -1,7 +1,13 @@
 #include "tetris.h"
 
+#include "../../gui/cli/cli.h"
 FullGameInfo_t* getInfo() {
   static FullGameInfo_t state = {0};
+  static int init = 1;
+  if (init) {
+    state.screen.high_score = 0;
+    init = 0;
+  }
   return &state;
 }
 
@@ -16,20 +22,16 @@ void initInfo() {
     state->screen.next[i] = (int*)calloc(sizeof(int), 4);
   }
   state->screen.score = 0;
-  state->screen.high_score = 0;
   state->screen.level = 1;
   state->screen.speed = 1200;
   state->screen.pause = 0;
 
-  state->rows_to_delete[0] = 0;
-  for (int i = 1; i < 5; i++) {
-    state->rows_to_delete[i] = -1;
-  }
+  for (int i = 0; i < 5; i++) state->rows_to_delete[i] = i ? -1 : 0;
 
   state->status = START;
 
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
+  for (int i = 0; i < LENGTH; i++) {
+    for (int j = 0; j < WIDTH; j++) {
       state->matrix_without_block[i][j] = 0;
     }
   }
@@ -151,22 +153,27 @@ void clean_screen(TetrisInfo* screen) {
 
 int full_field() {
   FullGameInfo_t* state = getInfo();
+  if (state->status == START) return 0;
   Block block = state->block_now;
   int res = 0;
   if (block.x < 0 || block.x + block.rows > LENGTH || block.y < 0 ||
       block.y + block.columns > WIDTH) {
     res = 1;
   }
-
   for (int i = 0; i < LENGTH; i++) {
     for (int j = 0; j < WIDTH; j++) {
       state->screen.field[i][j] = state->matrix_without_block[i][j];
       int is_now_x = i - block.x;
       int is_now_y = j - block.y;
+
       if (is_now_x < block.rows && is_now_x >= 0 && is_now_y < block.columns &&
-          is_now_y >= 0)
+          is_now_y >= 0) {
         state->screen.field[i][j] += block.matrix[is_now_x][is_now_y];
+      }  // тут
+
       if (state->screen.field[i][j] > 1) res = state->screen.field[i][j];
+      // mvprintw(19, 50, "OKOKOKOKOKOKOKOKOKOKOKOKOK %d, %d\t\t", i, j);
+      // refresh();
     }
   }
   return res;
@@ -174,6 +181,7 @@ int full_field() {
 
 void next_field() {
   FullGameInfo_t* state = getInfo();
+  if (state->status == START) return;
   Block block = state->block_next;
   int x = 1;
   int y = 0;

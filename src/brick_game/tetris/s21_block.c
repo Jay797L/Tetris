@@ -62,19 +62,6 @@ void gen_block(Block *block) {
   }
 }
 
-void rotate_block(Block *block) {
-  Block bufer = *block;
-  remove_block(block);
-  block->rows = bufer.columns;
-  block->columns = bufer.rows;
-  for (int i = 0; i < bufer.rows; i++) {
-    for (int j = 0; j < bufer.columns; j++)
-      block->matrix[j][i] = bufer.matrix[i][j];
-  }
-  block->y += bufer.columns - block->columns;
-  block->x += bufer.rows - block->rows;
-}
-
 void remove_block(Block *block) {
   for (int i = 0; i < block->rows; i++) {
     free(block->matrix[i]);

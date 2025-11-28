@@ -25,12 +25,11 @@ void tetris() {
   bool hold = 0;
   FullGameInfo_t* state = getInfo();
   initInfo();
-
   struct timeval last_time, current_time;
   gettimeofday(&last_time, NULL);
   while (state->status != QUIT) {
     auto_fall(&last_time, &current_time);
-    render(updateCurrentState());
+    render(updateCurrentState());  // тут
     ch = getch();
     userInput(functionKeys(ch), hold);
     nodelay(stdscr, state->status == GAME);
@@ -82,7 +81,7 @@ void userInput(UserAction_t action, bool hold) {
       terminate_game();
       break;
     case Up:
-      rotate();
+      lower_block();
       break;
     case Left:
       move_block(Left);
@@ -94,7 +93,7 @@ void userInput(UserAction_t action, bool hold) {
       move_block(Down);
       break;
     case Action:
-      lower_block();
+      rotate();
       break;
     default:
       break;
@@ -104,7 +103,7 @@ void userInput(UserAction_t action, bool hold) {
 
 GameInfo_t updateCurrentState() {
   FullGameInfo_t* state = getInfo();
-  full_field();
+  full_field();  // тут
   next_field();
   s21_brick_game screen;
   screen.tetris = state->screen;
