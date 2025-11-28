@@ -1,6 +1,4 @@
 #include "tetris.h"
-
-#include "../../gui/cli/cli.h"
 FullGameInfo_t* getInfo() {
   static FullGameInfo_t state = {0};
   static int init = 1;
@@ -169,11 +167,8 @@ int full_field() {
       if (is_now_x < block.rows && is_now_x >= 0 && is_now_y < block.columns &&
           is_now_y >= 0) {
         state->screen.field[i][j] += block.matrix[is_now_x][is_now_y];
-      }  // тут
-
+      }
       if (state->screen.field[i][j] > 1) res = state->screen.field[i][j];
-      // mvprintw(19, 50, "OKOKOKOKOKOKOKOKOKOKOKOKOK %d, %d\t\t", i, j);
-      // refresh();
     }
   }
   return res;
@@ -251,7 +246,7 @@ void killing_strings() {
   }
   state->screen.score += state->rows_to_delete[0];
   state->screen.level =
-      (state->screen.score <= 6000) ? (state->screen.score / 600 % 10 + 1) : 10;
+      (state->screen.score < 6000) ? (state->screen.score / 600 % 10 + 1) : 10;
   state->screen.speed = 1200 - state->screen.level * 100;
   state->rows_to_delete[0] = 0;
   if (state->screen.score > state->screen.high_score)

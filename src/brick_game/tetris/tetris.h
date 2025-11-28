@@ -37,9 +37,9 @@ typedef struct {
   int **matrix;
   int rows;
   int columns;
-  BlockType type;
   int x;
   int y;
+  BlockType type;
 } Block;
 
 typedef enum { START, PAUSE, GAMEOVER, GAME, QUIT } GameStatus;
@@ -48,10 +48,17 @@ typedef struct {
   TetrisInfo screen;
   Block block_now;
   Block block_next;
-  GameStatus status;
   int matrix_without_block[LENGTH][WIDTH];
   int rows_to_delete[5];
+  GameStatus status;
 } FullGameInfo_t;
+
+// typedef struct{
+//   short history[3];
+//   short types[7];
+//   short bag[35];
+//   short minimum;
+// } Bag;
 
 FullGameInfo_t *getInfo();
 
@@ -63,6 +70,8 @@ void rotate_block(Block *block);
 void remove_block(Block *block);
 void transfer_block(Block *now, Block *next);
 void transpose_block(Block *now, Block *bufer);
+
+// BlockType getType();
 
 void start_game();
 void pause_game();

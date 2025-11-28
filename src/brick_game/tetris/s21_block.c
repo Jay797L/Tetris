@@ -98,3 +98,10 @@ void transpose_block(Block *now, Block *bufer) {
       now->matrix[bufer->columns - j - 1][i] = bufer->matrix[i][j];
   }
 }
+
+// BlockType getType(){
+//   static Bag bag = {0};
+//   static short init = 1;
+
+//   return 0;
+// }
