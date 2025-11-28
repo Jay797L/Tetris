@@ -1,73 +1,71 @@
 #include "s21_brick_game.h"
 
-
-int main(){
-    initNcurses();
-    int ch;
-    while(1) {
-        printMenu();
-        ch = getch();
-        switch(ch) {
-            case '1':
-                tetris();
-                break;
-            case 'q':
-            case 'Q':
-                endwin();
-                return 0;
-            default:
-                break;
-        }
+int main() {
+  initNcurses();
+  int ch;
+  while (1) {
+    printMenu();
+    ch = getch();
+    switch (ch) {
+      case '1':
+        tetris();
+        break;
+      case 'q':
+      case 'Q':
+        endwin();
+        return 0;
+      default:
+        break;
     }
+  }
 }
 
-void tetris(){
-    int ch;
-    bool hold = 0;
-    FullGameInfo_t* state = getInfo();
-    initInfo();
+void tetris() {
+  int ch;
+  bool hold = 0;
+  FullGameInfo_t* state = getInfo();
+  initInfo();
 
-    struct timeval last_time, current_time;
-    gettimeofday(&last_time, NULL);
-    while(state->status != QUIT) {
-      auto_fall(&last_time, &current_time);
-      render(updateCurrentState());
-      ch = getch();
-      userInput(functionKeys(ch), hold);
-      nodelay(stdscr, state->status == GAME);
-    }
+  struct timeval last_time, current_time;
+  gettimeofday(&last_time, NULL);
+  while (state->status != QUIT) {
+    auto_fall(&last_time, &current_time);
+    render(updateCurrentState());
+    ch = getch();
+    userInput(functionKeys(ch), hold);
+    nodelay(stdscr, state->status == GAME);
+  }
 }
 
-UserAction_t functionKeys(int ch){
+UserAction_t functionKeys(int ch) {
   UserAction_t res = -1;
-  switch (ch)
-  {
-  case ('s'):
-    res = Start;
-    break;
-  case ('p'):
-    res = Pause;
-  break;
-  case ('q'):
-    res = Terminate;
-  break;
-  case (KEY_UP):
-    res = Up;
-  break;
-  case (KEY_LEFT):
-    res = Left;
-  break;
-  case (KEY_RIGHT):
-    res = Right;
-  break;
-  case (KEY_DOWN):
-    res = Down;
-  break;
-  case (' '):
-    res = Action;
-  break;
-  default:
-    break;
+  switch (ch) {
+    case ('s'):
+      res = Start;
+      break;
+    case ('p'):
+      res = Pause;
+      break;
+    case ('q'):
+      res = Terminate;
+      break;
+    case (KEY_UP):
+      res = Up;
+      break;
+    case (KEY_LEFT):
+      res = Left;
+      break;
+    case (KEY_RIGHT):
+      res = Right;
+      break;
+    case (KEY_DOWN):
+      res = Down;
+      break;
+    case (' '):
+      res = Action;
+      break;
+    default:
+      break;
   }
   return res;
 }
@@ -104,26 +102,27 @@ void userInput(UserAction_t action, bool hold) {
   if (hold == 1) hold = 0;
 }
 
-GameInfo_t updateCurrentState(){
-    FullGameInfo_t* state = getInfo();
-    full_field();
-    next_field();
-    s21_brick_game screen;
-    screen.tetris = state->screen;
-    return screen.screen;
+GameInfo_t updateCurrentState() {
+  FullGameInfo_t* state = getInfo();
+  full_field();
+  next_field();
+  s21_brick_game screen;
+  screen.tetris = state->screen;
+  return screen.screen;
 }
 
-void auto_fall(struct timeval *last_time, struct timeval *current_time){
+void auto_fall(struct timeval* last_time, struct timeval* current_time) {
   FullGameInfo_t* state = getInfo();
   // Получаем текущее время
   gettimeofday(current_time, NULL);
-        
+
   // Вычисляем прошедшее время в миллисекундах
-  long elapsed_ms = (current_time->tv_sec - last_time->tv_sec) * 1000 + (current_time->tv_usec - last_time->tv_usec) / 1000;
-        
+  long elapsed_ms = (current_time->tv_sec - last_time->tv_sec) * 1000 +
+                    (current_time->tv_usec - last_time->tv_usec) / 1000;
+
   // Если прошло достаточно времени для автопадения
   if (elapsed_ms >= state->screen.speed && state->status == GAME) {
     move_block(Down);
-    gettimeofday(last_time, NULL); // Сбрасываем таймер
+    gettimeofday(last_time, NULL);  // Сбрасываем таймер
   }
 }

@@ -1,13 +1,14 @@
 #ifndef SRC_S21_BRICK_GAME_H_
 #define SRC_S21_BRICK_GAME_H_
 
-#include "brick_game/tetris/tetris.h"
-#include "gui/cli/cli.h"
 #include <sys/time.h>
 
+#include "brick_game/tetris/tetris.h"
+#include "gui/cli/cli.h"
+
 typedef union {
-    GameInfo_t screen;
-    TetrisInfo tetris;
+  GameInfo_t screen;
+  TetrisInfo tetris;
 } s21_brick_game;
 
 typedef enum {

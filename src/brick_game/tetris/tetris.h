@@ -33,7 +33,7 @@ typedef enum {
   ZETA    // Z
 } BlockType;
 
-typedef struct{
+typedef struct {
   int **matrix;
   int rows;
   int columns;
@@ -42,13 +42,7 @@ typedef struct{
   int y;
 } Block;
 
-typedef enum{
-  START,
-  PAUSE,
-  GAMEOVER,
-  GAME,
-  QUIT
-} GameStatus;
+typedef enum { START, PAUSE, GAMEOVER, GAME, QUIT } GameStatus;
 
 typedef struct {
   TetrisInfo screen;
@@ -59,7 +53,7 @@ typedef struct {
   int rows_to_delete[5];
 } FullGameInfo_t;
 
-FullGameInfo_t* getInfo();
+FullGameInfo_t *getInfo();
 
 void initInfo();
 
@@ -77,7 +71,7 @@ void rotate();
 int move_block(int move);
 void lower_block();
 
-void clean_screen(TetrisInfo* screen);
+void clean_screen(TetrisInfo *screen);
 int full_field();
 void next_field();
 void attachment();
