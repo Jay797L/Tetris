@@ -1,4 +1,6 @@
 #include "tetris.h"
+// #include "../../gui/cli/cli.h"
+
 FullGameInfo_t* getInfo() {
   static FullGameInfo_t state = {0};
   static int init = 1;
@@ -149,6 +151,49 @@ void clean_screen(TetrisInfo* screen) {
   free(screen->next);
 }
 
+void add_ghost() {
+  FullGameInfo_t* state = getInfo();
+  if (state->status != GAME) return;
+  Block block = state->block_now;
+  while (move_ghost(&block) == 0);
+}
+
+int move_ghost(Block* block) {
+  int res = 0;
+  int old_x = block->x;
+  block->x += 1;
+  if (check_input(*block)) {
+    block->x = old_x;
+    res = 1;
+    attachment_ghost(*block);
+  }
+  return res;
+}
+
+int check_input(Block block) {
+  if (block.x + block.rows > LENGTH) return 1;
+  FullGameInfo_t* state = getInfo();
+  int res = 0;
+  for (int i = 0; i < block.rows; i++) {
+    for (int j = 0; j < block.columns; j++)
+      if (block.matrix[i][j] +
+              state->matrix_without_block[i + block.x][j + block.y] >
+          1)
+        res = 1;
+  }
+  return res;
+}
+
+void attachment_ghost(Block block) {
+  FullGameInfo_t* state = getInfo();
+  int** field = state->screen.field;
+  for (int i = 0; i < block.rows; i++) {
+    for (int j = 0; j < block.columns; j++)
+      if (field[i + block.x][j + block.y] == 0)
+        field[i + block.x][j + block.y] = block.matrix[i][j] * -1;
+  }
+}
+
 int full_field() {
   FullGameInfo_t* state = getInfo();
   if (state->status == START) return 0;
@@ -171,6 +216,7 @@ int full_field() {
       if (state->screen.field[i][j] > 1) res = state->screen.field[i][j];
     }
   }
+  if (res == 0) add_ghost();
   return res;
 }
 

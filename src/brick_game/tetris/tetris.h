@@ -91,4 +91,9 @@ void killing_strings();
 void remove_strings();
 
 void game_over();
+
+void add_ghost();
+int move_ghost(Block *block);
+int check_input(Block block);
+void attachment_ghost(Block block);
 #endif

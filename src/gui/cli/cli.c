@@ -104,8 +104,9 @@ void render(GameInfo_t screen) {
   if (screen.field != NULL) {
     for (int y = 0; y < 20; y++) {  // Отрисовываем только 20 строк
       for (int x = 0; x < FIELD_WIDTH; x++) {
-        if (screen.field[y][x]) {
-          mvprintw(start_y + y + 1, field_start_x + x * 2 + 1, "[]");
+        if (screen.field[y][x] != 0) {
+          mvprintw(start_y + y + 1, field_start_x + x * 2 + 1,
+                   screen.field[y][x] > 0 ? "[]" : " *");
         }
       }
     }
