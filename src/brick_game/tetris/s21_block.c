@@ -1,13 +1,13 @@
+#include "../../gui/cli/cli.h"
 #include "tetris.h"
-
 void create_block(Block *block) {
-  int type = rand() % 7;
+  int type = getBlock();
   block->rows = (type == ALPHA ? 1 : 2);
   block->columns = (type == ALPHA ? 4 : (type == DELTA) ? 2 : 3);
   block->matrix = (int **)calloc(block->rows, sizeof(int *));
-  for (int i = 0; i < block->rows; i++) {
+  for (int i = 0; i < block->rows; i++)
     block->matrix[i] = (int *)calloc(block->columns, sizeof(int));
-  }
+
   block->type = type;
 
   gen_block(block);
@@ -63,9 +63,7 @@ void gen_block(Block *block) {
 }
 
 void remove_block(Block *block) {
-  for (int i = 0; i < block->rows; i++) {
-    free(block->matrix[i]);
-  }
+  for (int i = 0; i < block->rows; i++) free(block->matrix[i]);
   free(block->matrix);
   block->matrix = NULL;
 }
@@ -89,19 +87,66 @@ void transpose_block(Block *now, Block *bufer) {
   now->rows = bufer->columns;
   now->columns = bufer->rows;
   now->matrix = (int **)calloc(now->rows, sizeof(int *));
-  for (int i = 0; i < now->rows; i++) {
+  for (int i = 0; i < now->rows; i++)
     now->matrix[i] = (int *)calloc(now->columns, sizeof(int));
-  }
 
-  for (int i = 0; i < bufer->rows; i++) {
+  for (int i = 0; i < bufer->rows; i++)
     for (int j = 0; j < bufer->columns; j++)
       now->matrix[bufer->columns - j - 1][i] = bufer->matrix[i][j];
-  }
 }
 
-// BlockType getType(){
-//   static Bag bag = {0};
-//   static short init = 1;
+Bag *getBag() {
+  static Bag bag = {0};
+  static short init = 1;
+  if (init) {
+    for (int i = 0; i < 35; i++) bag.bag[i] = i / 7;
+    for (int i = 0; i < 7; i++) bag.types[i] = 5;
+    bag.story = NULL;
+    bag.minimum = rand() % 7;
+  }
+  return &bag;
+}
 
-//   return 0;
-// }
+BlockType getBlock() {
+  Bag *bag = getBag();
+  struct History *story = (struct History *)calloc(sizeof(struct History), 1);
+  short index = 0;
+  do index = rand() % 35;
+  while (nebolshaya_istoricheskaya_spravka(bag->bag[index]));
+  story->block = bag->bag[index];
+  story->next = bag->story;
+  bag->story = story;
+  new_minimum(index);
+  return (BlockType)bag->story->block;
+}
+
+int nebolshaya_istoricheskaya_spravka(BlockType type) {
+  Bag *bag = getBag();
+  int res = 0;
+  if (bag->story != NULL && bag->story->next != NULL &&
+      bag->story->next->next != NULL) {
+    res = (bag->story->block == type && bag->story->next->block == type &&
+           bag->story->next->next->block == type);
+    if (!res) free(bag->story->next->next);
+  }
+  return res;
+}
+
+void new_minimum(int index) {
+  Bag *bag = getBag();
+  short min = -1;
+  bag->bag[index] = bag->minimum;
+  bag->types[bag->minimum] += 1;
+  mvprintw(1, 50, "OKOKOKOKOKOKOKOKOK %hd", bag->story->block);
+  refresh();
+  bag->types[bag->story->block] -= 1;
+  mvprintw(2, 50, "OKOKOKOKOKOKOKOKOK");
+  refresh();
+  for (short i = 0; i < 7; i++)
+    if (min > bag->types[i] && i != (short)bag->story->block &&
+        i != (short)bag->story->next->block &&
+        i != (short)bag->story->next->next->block) {
+      min = bag->types[i];
+      bag->minimum = i;
+    }
+}

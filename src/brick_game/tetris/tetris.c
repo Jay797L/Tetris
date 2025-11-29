@@ -1,5 +1,6 @@
 #include "tetris.h"
-// #include "../../gui/cli/cli.h"
+// #include "../../gui/cli/cli.h" mvprintw(1, 50, "OKOKOKOKOKOKOKOKOK");
+// refresh();
 
 FullGameInfo_t* getInfo() {
   static FullGameInfo_t state = {0};
@@ -13,14 +14,22 @@ FullGameInfo_t* getInfo() {
 
 void initInfo() {
   FullGameInfo_t* state = getInfo();
+  Bag* bag = getBag();
+  bag->story = (struct History*)calloc(sizeof(struct History), 1);
+  bag->story->block = rand() % 7;
+  bag->story->next = (struct History*)calloc(sizeof(struct History), 1);
+  bag->story->next->block = rand() % 7;
+  bag->story->next->next = (struct History*)calloc(sizeof(struct History), 1);
+  bag->story->next->next->block = rand() % 7;
+  bag->story->next->next->next = NULL;
   state->screen.field = (int**)calloc(sizeof(int*), LENGTH);
-  for (int i = 0; i < LENGTH; i++) {
+  for (int i = 0; i < LENGTH; i++)
     state->screen.field[i] = (int*)calloc(sizeof(int), WIDTH);
-  }
+
   state->screen.next = (int**)calloc(sizeof(int*), 4);
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++)
     state->screen.next[i] = (int*)calloc(sizeof(int), 4);
-  }
+
   state->screen.score = 0;
   state->screen.level = 1;
   state->screen.speed = 1200;
@@ -30,11 +39,8 @@ void initInfo() {
 
   state->status = START;
 
-  for (int i = 0; i < LENGTH; i++) {
-    for (int j = 0; j < WIDTH; j++) {
-      state->matrix_without_block[i][j] = 0;
-    }
-  }
+  for (int i = 0; i < LENGTH; i++)
+    for (int j = 0; j < WIDTH; j++) state->matrix_without_block[i][j] = 0;
 
   state->block_now.matrix = NULL;
   state->block_next.matrix = NULL;
@@ -71,12 +77,16 @@ void pause_game() {
 
 void terminate_game() {
   FullGameInfo_t* state = getInfo();
+  Bag* bag = getBag();
   if (state->status != START) {
     remove_block(&state->block_now);
     remove_block(&state->block_next);
   }
   state->status = QUIT;
   clean_screen(&state->screen);
+  free(bag->story->next->next);
+  free(bag->story->next);
+  free(bag->story);
 }
 
 void rotate() {

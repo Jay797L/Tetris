@@ -53,12 +53,17 @@ typedef struct {
   GameStatus status;
 } FullGameInfo_t;
 
-// typedef struct{
-//   short history[3];
-//   short types[7];
-//   short bag[35];
-//   short minimum;
-// } Bag;
+typedef struct History {
+  struct History *next;
+  BlockType block;
+} History;
+
+typedef struct {
+  struct History *story;
+  short types[7];
+  BlockType bag[35];
+  BlockType minimum;
+} Bag;
 
 FullGameInfo_t *getInfo();
 
@@ -66,12 +71,14 @@ void initInfo();
 
 void create_block(Block *block);
 void gen_block(Block *block);
-void rotate_block(Block *block);
 void remove_block(Block *block);
 void transfer_block(Block *now, Block *next);
 void transpose_block(Block *now, Block *bufer);
 
-// BlockType getType();
+Bag *getBag();
+BlockType getBlock();
+int nebolshaya_istoricheskaya_spravka(BlockType type);
+void new_minimum(int index);
 
 void start_game();
 void pause_game();
