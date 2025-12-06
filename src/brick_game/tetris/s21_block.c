@@ -1,4 +1,4 @@
-#include "../../gui/cli/cli.h"
+//#include "../../gui/cli/cli.h"
 #include "tetris.h"
 void create_block(Block *block) {
   int type = getBlock();
@@ -103,20 +103,23 @@ Bag *getBag() {
     for (int i = 0; i < 7; i++) bag.types[i] = 5;
     bag.story = NULL;
     bag.minimum = rand() % 7;
+    init = 0;
   }
   return &bag;
 }
 
 BlockType getBlock() {
   Bag *bag = getBag();
-  struct History *story = (struct History *)calloc(sizeof(struct History), 1);
+  History *story = (History *)calloc(sizeof(History), 1);
   short index = 0;
   do index = rand() % 35;
   while (nebolshaya_istoricheskaya_spravka(bag->bag[index]));
   story->block = bag->bag[index];
+
   story->next = bag->story;
   bag->story = story;
   new_minimum(index);
+  free(bag->story->next->next->next);
   return (BlockType)bag->story->block;
 }
 
@@ -127,7 +130,6 @@ int nebolshaya_istoricheskaya_spravka(BlockType type) {
       bag->story->next->next != NULL) {
     res = (bag->story->block == type && bag->story->next->block == type &&
            bag->story->next->next->block == type);
-    if (!res) free(bag->story->next->next);
   }
   return res;
 }
@@ -137,11 +139,7 @@ void new_minimum(int index) {
   short min = -1;
   bag->bag[index] = bag->minimum;
   bag->types[bag->minimum] += 1;
-  mvprintw(1, 50, "OKOKOKOKOKOKOKOKOK %hd", bag->story->block);
-  refresh();
-  bag->types[bag->story->block] -= 1;
-  mvprintw(2, 50, "OKOKOKOKOKOKOKOKOK");
-  refresh();
+  bag->types[bag->story->block] -= 1; //тут
   for (short i = 0; i < 7; i++)
     if (min > bag->types[i] && i != (short)bag->story->block &&
         i != (short)bag->story->next->block &&
