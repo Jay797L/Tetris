@@ -6,6 +6,7 @@ FullGameInfo_t* getInfo() {
   static FullGameInfo_t state = {0};
   static int init = 1;
   if (init) {
+    srand(time(NULL));
     state.screen.high_score = 0;
     init = 0;
   }
@@ -14,14 +15,6 @@ FullGameInfo_t* getInfo() {
 
 void initInfo() {
   FullGameInfo_t* state = getInfo();
-  Bag* bag = getBag();
-  bag->story = (struct History*)calloc(sizeof(struct History), 1);
-  bag->story->block = rand() % 7;
-  bag->story->next = (struct History*)calloc(sizeof(struct History), 1);
-  bag->story->next->block = rand() % 7;
-  bag->story->next->next = (struct History*)calloc(sizeof(struct History), 1);
-  bag->story->next->next->block = rand() % 7;
-  bag->story->next->next->next = NULL;
   state->screen.field = (int**)calloc(sizeof(int*), LENGTH);
   for (int i = 0; i < LENGTH; i++)
     state->screen.field[i] = (int*)calloc(sizeof(int), WIDTH);
@@ -77,16 +70,13 @@ void pause_game() {
 
 void terminate_game() {
   FullGameInfo_t* state = getInfo();
-  Bag* bag = getBag();
   if (state->status != START) {
     remove_block(&state->block_now);
     remove_block(&state->block_next);
   }
   state->status = QUIT;
   clean_screen(&state->screen);
-  free(bag->story->next->next);
-  free(bag->story->next);
-  free(bag->story);
+  remove_bag();
 }
 
 void rotate() {
@@ -220,9 +210,8 @@ int full_field() {
       int is_now_y = j - block.y;
 
       if (is_now_x < block.rows && is_now_x >= 0 && is_now_y < block.columns &&
-          is_now_y >= 0) {
+          is_now_y >= 0)
         state->screen.field[i][j] += block.matrix[is_now_x][is_now_y];
-      }
       if (state->screen.field[i][j] > 1) res = state->screen.field[i][j];
     }
   }

@@ -1,4 +1,4 @@
-//#include "../../gui/cli/cli.h"
+#include "../../gui/cli/cli.h"
 #include "tetris.h"
 void create_block(Block *block) {
   int type = getBlock();
@@ -99,10 +99,9 @@ Bag *getBag() {
   static Bag bag = {0};
   static short init = 1;
   if (init) {
-    for (int i = 0; i < 35; i++) bag.bag[i] = i / 7;
-    for (int i = 0; i < 7; i++) bag.types[i] = 5;
-    bag.story = NULL;
-    bag.minimum = rand() % 7;
+    for (int i = 0; i < 35; i++) bag.bag[i] = i / 5;
+    bag.order = NULL;
+    bag.history = NULL;
     init = 0;
   }
   return &bag;
@@ -110,41 +109,110 @@ Bag *getBag() {
 
 BlockType getBlock() {
   Bag *bag = getBag();
-  History *story = (History *)calloc(sizeof(History), 1);
+  List *story = NULL;
+  List *buf = NULL;
   short index = 0;
-  do index = rand() % 35;
-  while (nebolshaya_istoricheskaya_spravka(bag->bag[index]));
-  story->block = bag->bag[index];
-
-  story->next = bag->story;
-  bag->story = story;
-  new_minimum(index);
-  free(bag->story->next->next->next);
-  return (BlockType)bag->story->block;
+  short i = 0;
+  do {
+    index = rand() % 35;
+    i++;
+  } while (nebolshaya_istoricheskaya_spravka(bag->bag[index]) && i < 6);
+  create_list(&story, bag->bag[index]);
+  story->next = bag->history;
+  bag->history = story;
+  updateOrder(index); //тута
+  buf = bag->history;
+  for(int i = 0; i < 3 && buf->next != NULL;i++){
+    if(i == 2 && buf->next != NULL) {
+      free(buf->next);
+      buf->next = NULL;
+    }
+    else buf = buf->next;
+  }
+  return (BlockType)bag->history->block;
 }
 
-int nebolshaya_istoricheskaya_spravka(BlockType type) {
+short nebolshaya_istoricheskaya_spravka(BlockType type) {
   Bag *bag = getBag();
-  int res = 0;
-  if (bag->story != NULL && bag->story->next != NULL &&
-      bag->story->next->next != NULL) {
-    res = (bag->story->block == type && bag->story->next->block == type &&
-           bag->story->next->next->block == type);
+  short res = 0;
+  List *buf = bag->history;
+  for (int i = 0; i < 3 && buf != NULL; i++) {
+    res += buf->block == type;
+    buf = buf->next;
   }
   return res;
 }
 
-void new_minimum(int index) {
+void updateOrder(short index) {
   Bag *bag = getBag();
-  short min = -1;
-  bag->bag[index] = bag->minimum;
-  bag->types[bag->minimum] += 1;
-  bag->types[bag->story->block] -= 1; //тут
-  for (short i = 0; i < 7; i++)
-    if (min > bag->types[i] && i != (short)bag->story->block &&
-        i != (short)bag->story->next->block &&
-        i != (short)bag->story->next->next->block) {
-      min = bag->types[i];
-      bag->minimum = i;
+  BlockType type = bag->bag[index];
+  List *prev = NULL;
+  List *current = bag->order;
+  List *found = NULL;
+  while (current != NULL) {
+    if (current->block == type) {
+      found = current;
+      break;
     }
+    prev = current;
+    current = current->next;
+  }
+  if (found != NULL) {
+    if (prev != NULL) {
+      prev->next = found->next;
+    } else {
+      bag->order = found->next;
+    }
+    List *last = bag->order;
+    while (last != NULL && last->next != NULL) {
+      last = last->next;
+    }
+    found->next = NULL;
+    if (last == NULL) {
+      bag->order = found;
+    } else {
+      last->next = found;
+    }
+  } else {
+    List *new_node = (List *)calloc(sizeof(List), 1);
+    new_node->block = type;
+    new_node->next = NULL;
+    List *last = bag->order;
+    if (last == NULL) {
+      bag->order = new_node;
+    } else {
+      while (last->next != NULL) {
+        last = last->next;
+      }
+      last->next = new_node;
+    }
+  }
+  bag->bag[index] = bag->order->block;
+}
+
+void create_list(List** list, BlockType value) {
+  *list = (List *)calloc(sizeof(List), 1);
+  (*list)->next = NULL;
+  (*list)->block = value;
+}
+
+void remove_bag() {
+  Bag *bag = getBag();
+  List *buf;
+  if (bag->history != NULL) {
+    while (bag->history->next != NULL) {
+      buf = bag->history->next;
+      bag->history->next = bag->history->next->next;
+      free(buf);
+    }
+    free(bag->history);
+  }
+  if (bag->order != NULL) {
+    while (bag->order->next != NULL) {
+      buf = bag->order->next;
+      bag->order->next = bag->order->next->next;
+      free(buf);
+    }
+    free(bag->order);
+  }
 }

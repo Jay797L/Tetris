@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 typedef struct {
   int **field;
@@ -53,16 +54,15 @@ typedef struct {
   GameStatus status;
 } FullGameInfo_t;
 
-typedef struct History {
-  struct History *next;
+typedef struct List {
+  struct List *next;
   BlockType block;
-} History;
+} List;
 
 typedef struct {
-  struct History *story;
-  short types[7];
+  struct List *history;
+  struct List *order;
   BlockType bag[35];
-  BlockType minimum;
 } Bag;
 
 FullGameInfo_t *getInfo();
@@ -77,8 +77,10 @@ void transpose_block(Block *now, Block *bufer);
 
 Bag *getBag();
 BlockType getBlock();
-int nebolshaya_istoricheskaya_spravka(BlockType type);
-void new_minimum(int index);
+short nebolshaya_istoricheskaya_spravka(BlockType type);
+void updateOrder(short index);
+void create_list(List** list, BlockType value);
+void remove_bag();
 
 void start_game();
 void pause_game();

@@ -15,10 +15,10 @@ typedef struct {
 } GameInfo_t;
 
 // Цветовые пары
-#define COLOR_BLOCK 1      // Основной цвет блоков
-#define COLOR_GHOST 2      // Тёмно-серый цвет для "призрачных" блоков
-#define COLOR_BORDER 3     // Цвет границ
-#define COLOR_TEXT 4       // Цвет текста
+#define COLOR_BLOCK 1  // Основной цвет блоков
+#define COLOR_GHOST 2  // Тёмно-серый цвет для "призрачных" блоков
+#define COLOR_BORDER 3  // Цвет границ
+#define COLOR_TEXT 4    // Цвет текста
 
 void initNcurses();
 void printMenu();
