@@ -8,6 +8,7 @@ int main() {
     ch = getch();
     switch (ch) {
       case '1':
+        clear();
         tetris();
         break;
       case 'q':

@@ -5,6 +5,23 @@
 #define INFO_WIDTH 12
 #define DISPLAY_HEIGHT 22
 
+// Инициализация цветов
+void initColors() {
+    start_color();
+    
+    // Основной цвет блоков (например, белый на чёрном)
+    init_pair(COLOR_BLOCK, COLOR_WHITE, COLOR_BLACK);
+    
+    // Тёмно-серый цвет для "призрачных" блоков
+    init_pair(COLOR_GHOST, COLOR_BLACK, COLOR_BLACK); // Или используйте COLOR_BLACK для тёмно-серого
+    
+    // Цвет границ
+    init_pair(COLOR_BORDER, COLOR_CYAN, COLOR_BLACK);
+    
+    // Цвет текста
+    init_pair(COLOR_TEXT, COLOR_GREEN, COLOR_BLACK);
+}
+
 void initNcurses() {
   initscr();
   cbreak();
@@ -12,10 +29,21 @@ void initNcurses() {
   keypad(stdscr, TRUE);
   nodelay(stdscr, FALSE);
   curs_set(0);
+  
+  // Инициализация цветов
+  if (has_colors()) {
+      initColors();
+  }
 }
 
 void printMenu() {
   clear();
+  
+  // Используем цвет для границ
+  if (has_colors()) {
+      attron(COLOR_PAIR(COLOR_BORDER));
+  }
+  
   int height = 24;
   int width = 58;
 
@@ -40,6 +68,11 @@ void printMenu() {
   for (int i = 0; i < width; i++) {
     mvprintw(start_y + height - 1, start_x + i, "*");
   }
+  
+  if (has_colors()) {
+      attroff(COLOR_PAIR(COLOR_BORDER));
+      attron(COLOR_PAIR(COLOR_TEXT));
+  }
 
   char* title = "CHOOSE A GAME";
   int title_x = start_x + (width - strlen(title)) / 2;
@@ -52,12 +85,20 @@ void printMenu() {
     int item_x = start_x + (width - strlen(menu_items[i])) / 2;
     mvprintw(menu_start_y + i * 2, item_x, "%s", menu_items[i]);
   }
+  
+  if (has_colors()) {
+      attroff(COLOR_PAIR(COLOR_TEXT));
+  }
 
   refresh();
 }
 
 void render(GameInfo_t screen) {
-  clear();
+  
+  // Включаем цвет для границ
+  if (has_colors()) {
+      attron(COLOR_PAIR(COLOR_BORDER));
+  }
 
   int start_y = 1;
   int field_start_x = 1;
@@ -72,7 +113,7 @@ void render(GameInfo_t screen) {
   }
 
   // Боковые границы и содержимое - уменьшено до 20 строк
-  for (int y = 1; y <= 20; y++) {  // Было DISPLAY_HEIGHT (22)
+  for (int y = 1; y <= 20; y++) {
     // Левое окно - поле
     mvprintw(start_y + y, field_start_x, "*");
     mvprintw(start_y + y, field_start_x + FIELD_WIDTH * 2 + 1, "*");
@@ -90,34 +131,67 @@ void render(GameInfo_t screen) {
     }
   }
 
-  // Нижние границы - на 21 строке (start_y + 20 + 1)
+  // Нижние границы
   for (int i = 0; i < FIELD_WIDTH * 2 + 1; i++) {
-    mvprintw(start_y + 21, field_start_x + i,
-             "*");  // Было DISPLAY_HEIGHT + 1 (23)
+    mvprintw(start_y + 21, field_start_x + i, "*");
   }
   for (int i = 0; i < INFO_WIDTH * 2 + 1; i++) {
-    mvprintw(start_y + 21, info_start_x + i,
-             "*");  // Было DISPLAY_HEIGHT + 1 (23)
+    mvprintw(start_y + 21, info_start_x + i, "*");
+  }
+  
+  if (has_colors()) {
+      attroff(COLOR_PAIR(COLOR_BORDER));
   }
 
   // Отрисовка игрового поля (только 20 строк)
   if (screen.field != NULL) {
-    for (int y = 0; y < 20; y++) {  // Отрисовываем только 20 строк
+    for (int y = 0; y < 20; y++) {
       for (int x = 0; x < FIELD_WIDTH; x++) {
         if (screen.field[y][x] != 0) {
-          mvprintw(start_y + y + 1, field_start_x + x * 2 + 1,
-                   screen.field[y][x] > 0 ? "[]" : " *");
+          int cell_value = screen.field[y][x];
+          
+          // Устанавливаем позицию для отрисовки
+          int draw_y = start_y + y + 1;
+          int draw_x = field_start_x + x * 2 + 1;
+          
+          if (cell_value > 0) {
+              // Основные блоки
+              if (has_colors()) {
+                  attron(COLOR_PAIR(COLOR_BLOCK));
+              }
+              mvprintw(draw_y, draw_x, "[]");
+              if (has_colors()) {
+                  attroff(COLOR_PAIR(COLOR_BLOCK));
+              }
+          } else if (cell_value < 0) {
+              // Тёмно-серые блоки (призрачные)
+              if (has_colors()) {
+                  attron(COLOR_PAIR(COLOR_GHOST));
+              }
+              mvprintw(draw_y, draw_x, "[]");
+              if (has_colors()) {
+                  attroff(COLOR_PAIR(COLOR_GHOST));
+              }
+          }
         }
       }
     }
   }
 
   // Отрисовка информации в правом окне
+  
+  if (has_colors()) {
+      attron(COLOR_PAIR(COLOR_TEXT));
+  }
 
   // NEXT (следующая фигура)
   char* next_text = "NEXT";
   int next_x = info_start_x + (INFO_WIDTH * 2 - strlen(next_text)) / 2 + 1;
   mvprintw(start_y + 1, next_x, "%s", next_text);
+  
+  if (has_colors()) {
+      attron(COLOR_PAIR(COLOR_BORDER));
+  }
 
   // Рамка для следующей фигуры
   int next_box_y = start_y + 2;
@@ -140,6 +214,10 @@ void render(GameInfo_t screen) {
   for (int i = 0; i < 12; i++) {
     mvprintw(next_box_y + 5, next_box_x + i, "*");
   }
+  
+  if (has_colors()) {
+      attroff(COLOR_PAIR(COLOR_BORDER));
+  }
 
   // Отрисовка следующей фигуры по центру рамки
   if (screen.next != NULL) {
@@ -149,10 +227,20 @@ void render(GameInfo_t screen) {
           // Центрируем фигуру в рамке 12x6
           int draw_y = next_box_y + y + 1;
           int draw_x = next_box_x + (12 - 8) / 2 + x * 2;
+          if (has_colors()) {
+              attron(COLOR_PAIR(COLOR_BLOCK));
+          }
           mvprintw(draw_y, draw_x, "[]");
+          if (has_colors()) {
+              attroff(COLOR_PAIR(COLOR_BLOCK));
+          }
         }
       }
     }
+  }
+  
+  if (has_colors()) {
+      attron(COLOR_PAIR(COLOR_TEXT));
   }
 
   // SCORE
@@ -198,6 +286,11 @@ void render(GameInfo_t screen) {
   snprintf(speed_str, sizeof(speed_str), "SPEED %02d", screen.speed);
   int speed_x = info_start_x + (INFO_WIDTH * 2 - strlen(speed_str)) / 2 + 1;
   mvprintw(start_y + 19, speed_x, "%s", speed_str);
+  
+  if (has_colors()) {
+      attroff(COLOR_PAIR(COLOR_TEXT));
+  }
 
-  refresh();
+  wnoutrefresh(stdscr);
+  doupdate();
 }
