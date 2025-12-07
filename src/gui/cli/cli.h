@@ -25,4 +25,15 @@ void printMenu();
 void render(GameInfo_t screen);
 void initColors();
 
+// Новые функции для разделения
+void renderField(GameInfo_t screen, int start_y, int start_x);
+void renderNextFigure(GameInfo_t screen, int start_y, int info_start_x);
+void renderGameInfo(GameInfo_t screen, int start_y, int info_start_x);
+void drawWindowBorders(int start_y, int start_x);
+void drawNextFigureBox(GameInfo_t screen, int next_box_y, int next_box_x);
+void drawFieldCell(int value, int draw_y, int draw_x);
+
+void drawMenuFrame(int start_y, int start_x, int height, int width);
+void drawMenuText(int start_y, int start_x, int width);
+
 #endif

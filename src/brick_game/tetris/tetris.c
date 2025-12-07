@@ -23,6 +23,7 @@ void initInfo() {
   for (int i = 0; i < 4; i++)
     state->screen.next[i] = (int*)calloc(sizeof(int), 4);
 
+  state->screen.high_score = scan_score();
   state->screen.score = 0;
   state->screen.level = 1;
   state->screen.speed = 1200;
@@ -294,8 +295,10 @@ void killing_strings() {
       (state->screen.score < 6000) ? (state->screen.score / 600 % 10 + 1) : 10;
   state->screen.speed = 1200 - state->screen.level * 100;
   state->rows_to_delete[0] = 0;
-  if (state->screen.score > state->screen.high_score)
+  if (state->screen.score > state->screen.high_score) {
     state->screen.high_score = state->screen.score;
+    save_score(state->screen.high_score);
+  }
 }
 
 void remove_strings() {
@@ -316,4 +319,20 @@ void remove_strings() {
 void game_over() {
   FullGameInfo_t* state = getInfo();
   state->status = GAMEOVER;
+}
+
+int scan_score() {
+  int score = 0;
+  FILE* file = fopen("record.txt", "r");
+  if (file == NULL) return score;
+  fscanf(file, "%d", &score);
+  fclose(file);
+  return score;
+}
+
+void save_score(int score) {
+  FILE* file = fopen("record.txt", "w");
+  if (file == NULL) return;
+  fprintf(file, "%d", score);
+  fclose(file);
 }

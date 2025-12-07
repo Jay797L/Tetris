@@ -120,14 +120,14 @@ BlockType getBlock() {
   create_list(&story, bag->bag[index]);
   story->next = bag->history;
   bag->history = story;
-  updateOrder(index); //тута
+  updateOrder(index);  // тута
   buf = bag->history;
-  for(int i = 0; i < 3 && buf->next != NULL;i++){
-    if(i == 2 && buf->next != NULL) {
+  for (int i = 0; i < 3 && buf->next != NULL; i++) {
+    if (i == 2 && buf->next != NULL) {
       free(buf->next);
       buf->next = NULL;
-    }
-    else buf = buf->next;
+    } else
+      buf = buf->next;
   }
   return (BlockType)bag->history->block;
 }
@@ -190,7 +190,7 @@ void updateOrder(short index) {
   bag->bag[index] = bag->order->block;
 }
 
-void create_list(List** list, BlockType value) {
+void create_list(List **list, BlockType value) {
   *list = (List *)calloc(sizeof(List), 1);
   (*list)->next = NULL;
   (*list)->block = value;

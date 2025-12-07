@@ -79,7 +79,7 @@ Bag *getBag();
 BlockType getBlock();
 short nebolshaya_istoricheskaya_spravka(BlockType type);
 void updateOrder(short index);
-void create_list(List** list, BlockType value);
+void create_list(List **list, BlockType value);
 void remove_bag();
 
 void start_game();
@@ -105,4 +105,7 @@ void add_ghost();
 int move_ghost(Block *block);
 int check_input(Block block);
 void attachment_ghost(Block block);
+
+int scan_score();
+void save_score(int score);
 #endif

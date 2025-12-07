@@ -19,8 +19,8 @@ $(RESULT_LIB): $(SOURCES) $(HEADER) clean
 $(RESULT): $(SOURCES) $(HEADER) clean
 	$(CC) $(FLAGS) -o tetris $(SOURCES) -lncurses
 
-test: clean s21_matrix.a
-	$(CC) $(FLAGS) $(TEST) s21_matrix.a -o test $(CHECK_LIBS)
+test: clean $(RESULT)
+	$(CC) $(FLAGS) $(TEST) brick_game/tetris/tetris.c brick_game/tetris/s21_block.c gui/cli/cli.c -o test $(CHECK_LIBS) -lncurses
 	./test
 
 gcov_report: clean
@@ -32,7 +32,7 @@ gcov_report: clean
 
 clean:
 	rm -rf *.dSYM *.a test *.gcda *.gcno coverage.info coverage_report s21_matrix.info gcov.out report
-	rm -rf *.o
+	rm -rf *.o tetris record.txt
 
 clang: clean
 	echo "---\nBasedOnStyle: Google\n" > .clang-format
