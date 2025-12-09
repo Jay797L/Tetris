@@ -1,12 +1,24 @@
-#include "s21_brick_game.h"
+#ifndef SRC_S21_MANUAL_TESTS_H_
+#define SRC_S21_MANUAL_TESTS_H_
+
+#include "../s21_brick_game.h"
+
+#endif
+
+char get_char(){
+  static int i = -1;
+  int chars[50] = {'1', 's', 'p', KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, ' ', 'p', KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN, ' ', 'q', 'q'};
+  i++;
+  return chars[i];
+}
 
 int main() {
-  srand(time(NULL));
+  srand(0);
   initNcurses();
   int ch;
   while (1) {
     printMenu();
-    ch = getch();
+    ch = get_char();
     switch (ch) {
       case '1':
         clear();
@@ -32,8 +44,9 @@ void tetris() {
   while (state->status != QUIT) {
     auto_fall(&last_time, &current_time);
     render(updateCurrentState());
-    ch = getch();
+    ch = get_char();
     userInput(functionKeys(ch), hold);
     nodelay(stdscr, state->status == GAME);
   }
 }
+

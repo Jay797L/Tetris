@@ -1,15 +1,10 @@
 #include "tetris.h"
-// #include "../../gui/cli/cli.h" mvprintw(1, 50, "OKOKOKOKOKOKOKOKOK");
+// #include "../../gui/cli/cli.h"
+// mvprintw(1, 50, "OKOKOKOKOKOKOKOKOK");
 // refresh();
 
 FullGameInfo_t* getInfo() {
   static FullGameInfo_t state = {0};
-  static int init = 1;
-  if (init) {
-    srand(time(NULL));
-    state.screen.high_score = 0;
-    init = 0;
-  }
   return &state;
 }
 

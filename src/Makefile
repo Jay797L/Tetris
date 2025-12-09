@@ -17,11 +17,15 @@ $(RESULT_LIB): $(SOURCES) $(HEADER) clean
 	@rm *.o
 
 $(RESULT): $(SOURCES) $(HEADER) clean
-	$(CC) $(FLAGS) -o tetris $(SOURCES) -lncurses
+	$(CC) $(FLAGS) -o tetris $(SOURCES) s21_$(PROJECT_NAME)_functions.c -lncurses
 
 test: clean $(RESULT)
 	$(CC) $(FLAGS) $(TEST) brick_game/tetris/tetris.c brick_game/tetris/s21_block.c gui/cli/cli.c -o test $(CHECK_LIBS) -lncurses
 	./test
+
+manual_test: clean $(RESULT)
+	$(CC) $(FLAGS) tests/s21_manual_tests.c s21_$(PROJECT_NAME)_functions.c brick_game/tetris/tetris.c brick_game/tetris/s21_block.c gui/cli/cli.c -o manual_test -lncurses
+	./manual_test
 
 gcov_report: clean
 	$(CC) $(FLAGS) $(GCOV_FLAGS) $(SOURCES) $(TEST) -o gcov.out $(CHECK_LIBS)
