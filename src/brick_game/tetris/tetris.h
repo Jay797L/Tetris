@@ -70,6 +70,7 @@ FullGameInfo_t *getInfo();
 void initInfo();
 
 void create_block(Block *block);
+void create_block_with_type(Block *block, int type);
 void gen_block(Block *block);
 void remove_block(Block *block);
 void transfer_block(Block *now, Block *next);

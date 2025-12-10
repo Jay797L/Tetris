@@ -1,7 +1,9 @@
 CC = gcc
 FLAGS = -Wall -Wextra -g -Werror
 PROJECT_NAME = brick_game
-SOURCES = s21_$(PROJECT_NAME).c brick_game/tetris/tetris.c brick_game/tetris/s21_block.c gui/cli/cli.c
+BACKEND = brick_game/tetris/tetris.c brick_game/tetris/s21_block.c
+FRONTEND = gui/cli/cli.c
+SOURCES = s21_$(PROJECT_NAME).c s21_$(PROJECT_NAME)_functions.c $(BACKEND) $(FRONTEND) 
 HEADER = s21_$(PROJECT_NAME).h 
 RESULT = s21_$(PROJECT_NAME).o
 RESULT_LIB = s21_$(PROJECT_NAME).a
@@ -17,18 +19,14 @@ $(RESULT_LIB): $(SOURCES) $(HEADER) clean
 	@rm *.o
 
 $(RESULT): $(SOURCES) $(HEADER) clean
-	$(CC) $(FLAGS) -o tetris $(SOURCES) s21_$(PROJECT_NAME)_functions.c -lncurses
+	$(CC) $(FLAGS) $(SOURCES) -o tetris -lncurses
 
-test: clean $(RESULT)
-	$(CC) $(FLAGS) $(TEST) brick_game/tetris/tetris.c brick_game/tetris/s21_block.c gui/cli/cli.c -o test $(CHECK_LIBS) -lncurses
+test: clean
+	$(CC) $(FLAGS) $(TEST) $(BACKEND) $(CHECK_LIBS) -o test
 	./test
 
-manual_test: clean $(RESULT)
-	$(CC) $(FLAGS) tests/s21_manual_tests.c s21_$(PROJECT_NAME)_functions.c brick_game/tetris/tetris.c brick_game/tetris/s21_block.c gui/cli/cli.c -o manual_test -lncurses
-	./manual_test
-
 gcov_report: clean
-	$(CC) $(FLAGS) $(GCOV_FLAGS) $(SOURCES) $(TEST) -o gcov.out $(CHECK_LIBS)
+	$(CC) $(FLAGS) $(TEST) $(BACKEND) -o test $(CHECK_LIBS) $(GCOV_FLAGS) -o gcov.out -lncurses
 	./gcov.out
 	lcov --capture --directory . --output-file coverage.info
 	genhtml coverage.info --output-directory coverage_report
@@ -36,12 +34,12 @@ gcov_report: clean
 
 clean:
 	rm -rf *.dSYM *.a test *.gcda *.gcno coverage.info coverage_report s21_matrix.info gcov.out report
-	rm -rf *.o tetris record.txt
+	rm -rf *.o tetris test record.txt
 
 clang: clean
 	echo "---\nBasedOnStyle: Google\n" > .clang-format
-	clang-format -n *.c *.h */*/*.c */*/*.h
-	clang-format -i *.c *.h */*/*.c */*/*.h
+	clang-format -n *.c *.h */*.c */*.h */*/*.c */*/*.h
+	clang-format -i *.c *.h */*.c */*.h */*/*.c */*/*.h
 	rm -rf .clang-format
 
 leaks: test

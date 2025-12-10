@@ -1,7 +1,9 @@
-#include "../../gui/cli/cli.h"
+// #include "../../gui/cli/cli.h"
 #include "tetris.h"
-void create_block(Block *block) {
-  int type = getBlock();
+
+void create_block(Block *block) { create_block_with_type(block, getBlock()); }
+
+void create_block_with_type(Block *block, int type) {
   block->rows = (type == ALPHA ? 1 : 2);
   block->columns = (type == ALPHA ? 4 : (type == DELTA) ? 2 : 3);
   block->matrix = (int **)calloc(block->rows, sizeof(int *));
@@ -206,6 +208,7 @@ void remove_bag() {
       free(buf);
     }
     free(bag->history);
+    bag->history = NULL;
   }
   if (bag->order != NULL) {
     while (bag->order->next != NULL) {
@@ -214,5 +217,6 @@ void remove_bag() {
       free(buf);
     }
     free(bag->order);
+    bag->order = NULL;
   }
 }
