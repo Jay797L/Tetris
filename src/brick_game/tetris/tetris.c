@@ -190,6 +190,25 @@ void attachment_ghost(Block block) {
   }
 }
 
+void next_field() {
+  FullGameInfo_t* state = getInfo();
+  if (state->status == START) return;
+  Block block = state->block_next;
+  int x = 1;
+  int y = 0;
+  if (block.type == DELTA) y = 1;
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      state->screen.next[i][j] = 0;
+      int is_now_x = i - x;
+      int is_now_y = j - y;
+      if (is_now_x < block.rows && is_now_x >= 0 && is_now_y < block.columns &&
+          is_now_y >= 0)
+        state->screen.next[i][j] = block.matrix[is_now_x][is_now_y];
+    }
+  }
+}
+
 int full_field() {
   FullGameInfo_t* state = getInfo();
   if (state->status == START) return 0;

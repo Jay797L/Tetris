@@ -95,20 +95,6 @@ START_TEST(test_pause_game_toggles) {
 }
 END_TEST
 
-// START_TEST(test_terminate_game_cleans_resources) {
-//     // Создаем блоки для теста
-//     state->status = GAME;
-//     create_block(&state->block_now);
-//     create_block(&state->block_next);
-
-//     terminate_game();
-
-//     ck_assert_int_eq(state->status, QUIT);
-//     ck_assert_ptr_null(state->block_now.matrix);
-//     ck_assert_ptr_null(state->block_next.matrix);
-// }
-// END_TEST
-
 START_TEST(test_move_block_right) {
   state->status = GAME;
   create_block(&state->block_now);
@@ -220,32 +206,6 @@ START_TEST(test_create_block_allocates_memory) {
   remove_block(&block);
 }
 END_TEST
-
-// START_TEST(test_gen_block_initializes_correctly) {
-//     Block block;
-//     block.type = ALPHA;
-//     block.rows = 1;
-//     block.columns = 4;
-//     block.matrix = (int**)calloc(block.rows, sizeof(int*));
-//     for (int i = 0; i < block.rows; i++) {
-//         block.matrix[i] = (int*)calloc(block.columns, sizeof(int));
-//     }
-
-//     gen_block(&block);
-
-//     // Проверка I-образного блока (ALPHA)
-//     ck_assert_int_eq(block.matrix[0][0], 1);
-//     ck_assert_int_eq(block.matrix[0][1], 1);
-//     ck_assert_int_eq(block.matrix[0][2], 1);
-//     ck_assert_int_eq(block.matrix[0][3], 1);
-//     ck_assert_int_eq(block.y, 3); // (10 - 4) / 2 = 3
-
-//     for (int i = 0; i < block.rows; i++) {
-//         free(block.matrix[i]);
-//     }
-//     free(block.matrix);
-// }
-// END_TEST
 
 START_TEST(test_remove_block_frees_memory) {
   Block block;
@@ -406,6 +366,153 @@ START_TEST(test_gen_blocks) {
 }
 END_TEST
 
+START_TEST(test_killing_strings) {
+  state->status = GAME;
+
+  state->rows_to_delete[1] = 5;
+  state->rows_to_delete[2] = 10;
+  state->rows_to_delete[3] = -1;
+  state->rows_to_delete[4] = -1;
+
+  state->rows_to_delete[0] = 300;
+
+  for (int i = 0; i < LENGTH; i++)
+    for (int j = 0; j < WIDTH; j++)
+      state->screen.field[i][j] = (i == 5 || i == 10) ? 1 : 0;
+
+  int initial_score = state->screen.score;
+  int initial_level = state->screen.level;
+
+  killing_strings();
+
+  for (int j = 0; j < WIDTH; j++) {
+    ck_assert_int_eq(state->screen.field[5][j], 2);
+    ck_assert_int_eq(state->screen.field[10][j], 2);
+  }
+
+  for (int j = 0; j < WIDTH; j++) {
+    if (3 != 5 && 3 != 10) ck_assert_int_eq(state->screen.field[3][j], 0);
+    if (7 != 5 && 7 != 10) ck_assert_int_eq(state->screen.field[7][j], 0);
+    if (15 != 5 && 15 != 10) ck_assert_int_eq(state->screen.field[15][j], 0);
+  }
+
+  ck_assert_int_eq(state->screen.score, initial_score + 300);
+
+  for (int i = 1; i < 5; i++) ck_assert_int_eq(state->rows_to_delete[i], -1);
+
+  ck_assert_int_eq(state->rows_to_delete[0], 0);
+
+  if (state->screen.score >= 600)
+    ck_assert_int_ge(state->screen.level, initial_level);
+  else
+    ck_assert_int_eq(state->screen.level, initial_level);
+}
+END_TEST
+
+START_TEST(test_killing_strings_with_different_scores) {
+  state->status = GAME;
+
+  state->screen.score = 0;
+  state->rows_to_delete[0] = 100;
+  state->rows_to_delete[1] = 3;
+  state->rows_to_delete[2] = -1;
+  state->rows_to_delete[3] = -1;
+  state->rows_to_delete[4] = -1;
+
+  killing_strings();
+  ck_assert_int_eq(state->screen.score, 100);
+
+  state->screen.score = 0;
+  state->rows_to_delete[0] = 700;
+  state->rows_to_delete[1] = 3;
+  state->rows_to_delete[2] = 5;
+  state->rows_to_delete[3] = 7;
+  state->rows_to_delete[4] = -1;
+
+  killing_strings();
+  ck_assert_int_eq(state->screen.score, 700);
+
+  state->screen.score = 0;
+  state->rows_to_delete[0] = 1500;
+  state->rows_to_delete[1] = 3;
+  state->rows_to_delete[2] = 5;
+  state->rows_to_delete[3] = 7;
+  state->rows_to_delete[4] = 9;
+
+  killing_strings();
+  ck_assert_int_eq(state->screen.score, 1500);
+}
+END_TEST
+
+START_TEST(test_remove_strings_basic) {
+  state->status = GAME;
+
+  for (int i = 0; i < LENGTH; i++)
+    for (int j = 0; j < WIDTH; j++)
+      state->screen.field[i][j] = (i == 5 || i == 10) ? 2
+                                  : (i % 2 == 0)      ? 1
+                                                      : 0;
+
+  for (int i = 0; i < LENGTH; i++)
+    for (int j = 0; j < WIDTH; j++)
+      state->matrix_without_block[i][j] = state->screen.field[i][j];
+
+  remove_strings();
+
+  for (int j = 0; j < WIDTH; j++) {
+    ck_assert_int_ne(state->matrix_without_block[5][j], 2);
+    ck_assert_int_ne(state->matrix_without_block[10][j], 2);
+
+    ck_assert_int_eq(state->matrix_without_block[6][j], 1);
+    ck_assert_int_eq(state->matrix_without_block[11][j], 0);
+  }
+}
+END_TEST
+
+START_TEST(test_remove_strings_consecutive_lines) {
+  state->status = GAME;
+
+  for (int i = 0; i < LENGTH; i++)
+    for (int j = 0; j < WIDTH; j++)
+      state->screen.field[i][j] = (i >= 5 && i <= 7) ? 2 : (i < 5) ? 1 : 0;
+
+  for (int i = 0; i < LENGTH; i++)
+    for (int j = 0; j < WIDTH; j++)
+      state->matrix_without_block[i][j] = state->screen.field[i][j];
+
+  remove_strings();
+
+  for (int i = 5; i <= 7; i++)
+    for (int j = 0; j < WIDTH; j++)
+      ck_assert_int_eq(state->matrix_without_block[i][j], 1);
+  for (int j = 0; j < WIDTH; j++) {
+    for (int i = 0; i < 3; i++)
+      ck_assert_int_eq(state->matrix_without_block[i][j], 0);
+    for (int i = 3; i < 8; i++)
+      ck_assert_int_eq(state->matrix_without_block[i][j], 1);
+  }
+}
+END_TEST
+
+START_TEST(test_next_field) {
+  state->status = GAME;
+
+  if (state->block_next.matrix != NULL) remove_block(&state->block_next);
+
+  create_block_with_type(&state->block_next, ALPHA);
+
+  next_field();
+
+  for (int j = 0; j < 4; j++) ck_assert_int_eq(state->screen.next[0][j], 0);
+
+  for (int j = 0; j < 4; j++) ck_assert_int_eq(state->screen.next[1][j], 1);
+
+  for (int j = 0; j < 4; j++) ck_assert_int_eq(state->screen.next[2][j], 0);
+
+  for (int j = 0; j < 4; j++) ck_assert_int_eq(state->screen.next[3][j], 0);
+}
+END_TEST
+
 Suite* tetris_suite(void) {
   Suite* s = suite_create("Tetris");
 
@@ -417,7 +524,6 @@ Suite* tetris_suite(void) {
   tcase_add_test(tc_core, test_start_game_from_start_state);
   tcase_add_test(tc_core, test_start_game_from_gameover_state);
   tcase_add_test(tc_core, test_pause_game_toggles);
-  // tcase_add_test(tc_core, test_terminate_game_cleans_resources);
   tcase_add_test(tc_core, test_move_block_right);
   tcase_add_test(tc_core, test_move_block_left);
   tcase_add_test(tc_core, test_move_block_down_returns_attachment_status);
@@ -425,13 +531,17 @@ Suite* tetris_suite(void) {
   tcase_add_test(tc_core, test_kill_string_input);
   tcase_add_test(tc_core, test_kill_score_input_calculates_correctly);
   tcase_add_test(tc_core, test_scan_and_save_score);
+  tcase_add_test(tc_core, test_killing_strings);
+  tcase_add_test(tc_core, test_killing_strings_with_different_scores);
+  tcase_add_test(tc_core, test_remove_strings_basic);
+  tcase_add_test(tc_core, test_remove_strings_consecutive_lines);
+  tcase_add_test(tc_core, test_next_field);
   suite_add_tcase(s, tc_core);
 
   // Block manipulation tests (s21_block.c)
   TCase* tc_blocks = tcase_create("Blocks");
   tcase_add_checked_fixture(tc_blocks, setup, teardown);
   tcase_add_test(tc_blocks, test_create_block_allocates_memory);
-  // tcase_add_test(tc_blocks, test_gen_block_initializes_correctly);
   tcase_add_test(tc_blocks, test_remove_block_frees_memory);
   tcase_add_test(tc_blocks, test_transfer_block_moves_next_to_now);
   tcase_add_test(tc_blocks, test_getBag_returns_same_instance);
