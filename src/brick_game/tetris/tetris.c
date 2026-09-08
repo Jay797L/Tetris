@@ -10,13 +10,13 @@ FullGameInfo_t* getInfo() {
 
 void initInfo() {
   FullGameInfo_t* state = getInfo();
-  state->screen.field = (int**)calloc(sizeof(int*), LENGTH);
+  state->screen.field = (int**)calloc(LENGTH, sizeof(int*));
   for (int i = 0; i < LENGTH; i++)
-    state->screen.field[i] = (int*)calloc(sizeof(int), WIDTH);
+    state->screen.field[i] = (int*)calloc(WIDTH, sizeof(int));
 
-  state->screen.next = (int**)calloc(sizeof(int*), 4);
+  state->screen.next = (int**)calloc(4, sizeof(int*));
   for (int i = 0; i < 4; i++)
-    state->screen.next[i] = (int*)calloc(sizeof(int), 4);
+    state->screen.next[i] = (int*)calloc(4, sizeof(int));
 
   state->screen.high_score = scan_score();
   state->screen.score = 0;

@@ -176,7 +176,7 @@ void updateOrder(short index) {
       last->next = found;
     }
   } else {
-    List *new_node = (List *)calloc(sizeof(List), 1);
+    List *new_node = (List *)calloc(1, sizeof(List));
     new_node->block = type;
     new_node->next = NULL;
     List *last = bag->order;
@@ -193,7 +193,7 @@ void updateOrder(short index) {
 }
 
 void create_list(List **list, BlockType value) {
-  *list = (List *)calloc(sizeof(List), 1);
+  *list = (List *)calloc(1, sizeof(List));
   (*list)->next = NULL;
   (*list)->block = value;
 }
